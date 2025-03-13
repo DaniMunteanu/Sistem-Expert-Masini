@@ -1,0 +1,51 @@
+[
+{
+    "if" : {
+        "vclass" : "Compact Cars" 
+    },
+    "then": {
+        "next_rule" : "2"
+    }
+},
+{
+    "if" : {
+        "vclass" : "Subcompact Cars" 
+    },
+    "then": {
+        "next_rule" : "2"
+    }
+},
+{
+    "if" : {
+        "fueltype" : "Regular" 
+    },
+    "then": {
+        "next_rule" : "4"
+    }
+},
+{
+    "if" : {
+        "fueltype" : "Electricity" 
+    },
+    "then": {
+        "next_rule" : "4"
+    }
+},
+{
+    "if" : {
+        "drive" : "Front-Wheel Drive" 
+    },
+    "then": {
+        "next_rule" : "6"
+    }
+},
+{
+    "if" : {
+        "drive" : "Rear-Wheel Drive" 
+    },
+    "then": {
+        "next_rule" : "6"
+    }
+}
+
+]

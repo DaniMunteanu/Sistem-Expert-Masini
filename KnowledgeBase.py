@@ -7,9 +7,9 @@ class KnowledgeBase:
         cred = credentials.Certificate("credentials.json")
         firebase_admin.initialize_app(cred, {"databaseURL": "https://knowledgebase-fb0c0-default-rtdb.europe-west1.firebasedatabase.app/"})
 
-    def _read_file(self):
+    def _read_file(self,file):
         try:
-            with open("all-vehicles-model@public.json") as f:
+            with open(file) as f:
                 data = json.load(f)
                 print("succes")
                 return data
@@ -20,11 +20,15 @@ class KnowledgeBase:
             print('Invalid JSON format')
             exit(1)
 
-    def _update_firebase(self,data):
-        ref = db.reference("/data")
-        ref.set(data)
+    def _update_firebase(self,table_data,path):
+        ref = db.reference(path)
+        ref.set(table_data)
         print("Data successfully uploaded to Realtime Database!")
 
 # Am rulat deja asta. Datele ar trebui sa fie in https://knowledgebase-fb0c0-default-rtdb.europe-west1.firebasedatabase.app/. Daca nu, trebuie rulata partea asta
-# kb = KnowledgeBase()
-# kb._update_firebase(kb._read_file())
+kb = KnowledgeBase()
+# kb._update_firebase(kb._read_file("all-vehicles-model@public.json"),"/data")
+
+# La fel ca la celalalt apel de _update_firebase
+# Prioritatea verificarilor m-am gandit sa fie vehicle size class -> fuel type -> drive -> transmission -> cylinders -> make
+# kb._update_firebase(kb._read_file("rules.json"),"/rules")
