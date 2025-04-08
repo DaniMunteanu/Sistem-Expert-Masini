@@ -1,6 +1,6 @@
 import json
 
-class BackwardChainingCarExpert:
+class CarExpert:
     def __init__(self, knowledge_base_file="all-vehicles-model@public.json"):
         self.load_knowledge_base(knowledge_base_file)
         self.recommendations = []
@@ -352,5 +352,5 @@ class BackwardChainingCarExpert:
 
 
 if __name__ == "__main__":
-    expert_system = BackwardChainingCarExpert()
+    expert_system = CarExpert()
     expert_system.run()
