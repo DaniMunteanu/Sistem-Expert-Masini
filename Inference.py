@@ -403,7 +403,6 @@ class CarExpert:
         return user_prefs
     
     def rule_perfect_match(self, user_prefs):
-        """Rule for perfect match"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -424,7 +423,6 @@ class CarExpert:
         return matches
     
     def rule_relax_cylinders(self, user_prefs):
-        """Rule for relaxing cylinder constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -447,7 +445,6 @@ class CarExpert:
         return matches
     
     def rule_relax_transmission(self, user_prefs):
-        """Rule for relaxing transmission constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -469,7 +466,6 @@ class CarExpert:
         return matches
     
     def rule_relax_drive(self, user_prefs):
-        """Rule for relaxing drive type constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -490,7 +486,6 @@ class CarExpert:
         return matches
     
     def rule_relax_fuel_type(self, user_prefs):
-        """Rule for relaxing fuel type constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -510,7 +505,6 @@ class CarExpert:
         return matches
     
     def rule_last_resort(self, user_prefs):
-        """Last resort rule - returns random cars"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") is not None and
@@ -529,10 +523,6 @@ class CarExpert:
         return matches
     
     def backward_chain(self, goal, user_preferences):
-        """
-        Implements backward chaining to find recommendations.
-        Goal is the rule we're trying to confirm.
-        """
         self.recommendations = []
         models_already_recommended = set() # Salvare modele deja recomandate
         
@@ -572,7 +562,6 @@ class CarExpert:
         return self.recommendations
     
     def display_recommendations(self, recommendations, limit=3):
-        """Displays recommendations"""
         if not recommendations:
             print("\nNo recommendations found that match your preferences.")
             return
