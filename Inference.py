@@ -1,6 +1,17 @@
 import json
+import os
+from google_images_search import GoogleImagesSearch
 
-import json
+# Google API KEY ---------|
+#                         V
+gis = GoogleImagesSearch('', '62abc5b0b032e4571')
+
+_search_params = {
+    'q': '',
+    'num': 2,
+    'fileType': 'jpg',
+    'rights': 'cc_publicdomain|cc_attribute|cc_sharealike|cc_noncommercial|cc_nonderived'
+}
 
 class CarExpert:
     def __init__(self, knowledge_base_file="all-vehicles-model@public.json"):
@@ -20,6 +31,11 @@ class CarExpert:
         except Exception as e:
             print(f"Error loading knowledge base: {e}")
             self.car_data = []
+
+    def _download_images(self,searched_car):
+        _search_params["q"] = searched_car["make"] + " " + searched_car["model"] + " " + searched_car["year"]
+        
+        gis.search(search_params=_search_params, path_to_dir='Images', custom_image_name = searched_car["make"] + "_" + searched_car["model"] + "_" + searched_car["year"])
     
     def group_options(self, options, option_type):
         if option_type == "vclass":
@@ -566,6 +582,14 @@ class CarExpert:
             print("\nNo recommendations found that match your preferences.")
             return
             
+        # Sterg pozele recomandarilor trecute    
+        folder_path = 'Images'
+
+        for filename in os.listdir(folder_path):
+            file_path = os.path.join(folder_path, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
         print(f"\n=== TOP {min(limit, len(recommendations))} RECOMMENDATIONS ===\n")
         
         for i, recommendation in enumerate(recommendations[:limit], 1):
@@ -581,6 +605,9 @@ class CarExpert:
             print(f"Drive type: {car_data.get('drive', 'Unknown')}")
             print(f"Transmission: {car_data.get('trany', 'Unknown')}")
             print(f"Cylinders: {car_data.get('cylinders', 'Unknown')}")
+
+            # Descarc pozele recomandarilor curente
+            self._download_images(car_data)
             print("-" * 50)
 
     def run(self):        
