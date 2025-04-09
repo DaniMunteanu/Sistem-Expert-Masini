@@ -1,5 +1,7 @@
 import json
 
+import json
+
 class CarExpert:
     def __init__(self, knowledge_base_file="all-vehicles-model@public.json"):
         self.load_knowledge_base(knowledge_base_file)
@@ -7,7 +9,6 @@ class CarExpert:
         self.recommendation_limit = 10
         
     def load_knowledge_base(self, knowledge_base_file):
-        """Loads the knowledge base from the JSON file"""
         try:
             with open(knowledge_base_file) as f:
                 data = json.load(f)
@@ -19,9 +20,104 @@ class CarExpert:
         except Exception as e:
             print(f"Error loading knowledge base: {e}")
             self.car_data = []
+    
+    def group_options(self, options, option_type):
+        if option_type == "vclass":
+            grouped = {}
+            for option in options:
+                if "Sport Utility Vehicle" in option or "SUV" in option:
+                    grouped.setdefault("SUV", []).append(option)
+                elif "Pickup" in option:
+                    grouped.setdefault("Pickup Truck", []).append(option)
+                elif "Cars" in option or "Compact" in option or "Subcompact" in option or "Minicompact" in option:
+                    grouped.setdefault("Car", []).append(option)
+                elif "Station Wagon" in option:
+                    grouped.setdefault("Station Wagon", []).append(option)
+                elif "Van" in option:
+                    grouped.setdefault("Van", []).append(option)
+                elif "Two Seaters" in option:
+                    grouped.setdefault("Sports Car", []).append(option)
+                elif "Special Purpose" in option:
+                    grouped.setdefault("Special Purpose", []).append(option)
+                else:
+                    grouped.setdefault("Other", []).append(option)
+            return grouped
+            
+        elif option_type == "fueltype":
+            grouped = {}
+            for option in options:
+                if option is None:
+                    continue
+                if "Regular" in option or "Gasoline" in option or "Gas" in option:
+                    grouped.setdefault("Gasoline", []).append(option)
+                elif "Premium" in option:
+                    grouped.setdefault("Premium Gasoline", []).append(option)
+                elif "Diesel" in option:
+                    grouped.setdefault("Diesel", []).append(option)
+                elif "Electric" in option or "Electricity" in option:
+                    grouped.setdefault("Electric/Hybrid", []).append(option)
+                elif "CNG" in option or "natural gas" in option:
+                    grouped.setdefault("Natural Gas", []).append(option)
+                elif "Hydrogen" in option:
+                    grouped.setdefault("Hydrogen", []).append(option)
+                else:
+                    grouped.setdefault("Other", []).append(option)
+            return grouped
+            
+        elif option_type == "drive":
+            grouped = {}
+            for option in options:
+                if option is None:
+                    continue
+                if "All-Wheel" in option:
+                    grouped.setdefault("All-Wheel Drive", []).append(option)
+                elif "4-Wheel" in option:
+                    grouped.setdefault("4-Wheel Drive", []).append(option)
+                elif "Front-Wheel" in option:
+                    grouped.setdefault("Front-Wheel Drive", []).append(option)
+                elif "Rear-Wheel" in option:
+                    grouped.setdefault("Rear-Wheel Drive", []).append(option)
+                elif "2-Wheel" in option:
+                    grouped.setdefault("2-Wheel Drive", []).append(option)
+                else:
+                    grouped.setdefault("Other", []).append(option)
+            return grouped
+            
+        elif option_type == "trany":
+            grouped = {}
+            for option in options:
+                if option is None:
+                    continue
+                if "Automatic" in option:
+                    grouped.setdefault("Automatic", []).append(option)
+                elif "Manual" in option:
+                    grouped.setdefault("Manual", []).append(option)
+                else:
+                    grouped.setdefault("Other", []).append(option)
+            return grouped
+            
+        elif option_type == "cylinders":
+            grouped = {}
+            for option in options:
+                if option is None:
+                    continue
+                option_str = str(option)
+                if option_str in ["2", "3"]:
+                    grouped.setdefault("Small (2-3)", []).append(option)
+                elif option_str == "4":
+                    grouped.setdefault("4 Cylinders", []).append(option)
+                elif option_str in ["5", "6"]:
+                    grouped.setdefault("Medium (5-6)", []).append(option)
+                elif option_str in ["8", "10", "12", "16"]:
+                    grouped.setdefault("Large (8+)", []).append(option)
+                else:
+                    grouped.setdefault("Other", []).append(option)
+            return grouped
+            
+        # Default - fara grupare
+        return {option: [option] for option in options}
             
     def display_available_options(self):
-        """Display available options for each criterion"""
         if not self.car_data:
             print("Knowledge base has not been loaded.")
             return
@@ -39,109 +135,263 @@ class CarExpert:
         print("Available cylinder counts:", sorted(list(cylinders_values), key=str))
     
     def get_user_preferences(self):
-        """Gets user preferences interactively, showing available options at each step"""
-        print("\n=== Enter your preferences ===")
         user_prefs = {}
         
-        # Step 1: Choose vehicle class
         vclass_values = sorted(list(set(car.get("vclass") for car in self.car_data 
                                   if car.get("vclass") is not None)))
-        print("\nAvailable vehicle classes:")
-        for i, vclass in enumerate(vclass_values, 1):
-            print(f"{i}. {vclass}")
+        grouped_vclass = self.group_options(vclass_values, "vclass")
         
-        choice = input("\nSelect vehicle class (enter number or type custom value): ")
+        print("\nAvailable vehicle classes:")
+        for i, (group_name, options) in enumerate(grouped_vclass.items(), 1):
+            print(f"{i}. {group_name}")
+        
+        choice = input("\nSelect vehicle class type (enter number): ")
         try:
             index = int(choice) - 1
-            if 0 <= index < len(vclass_values):
-                user_prefs["vclass"] = vclass_values[index]
+            if 0 <= index < len(grouped_vclass):
+                group_name = list(grouped_vclass.keys())[index]
+
+                options = grouped_vclass[group_name]
+                if len(options) > 1:
+                    print(f"\nSpecific options for {group_name}:")
+                    for j, option in enumerate(options, 1):
+                        print(f"{j}. {option}")
+                    sub_choice = input("\nSelect specific option (enter number or 0 for any): ")
+                    try:
+                        sub_index = int(sub_choice) - 1
+                        if sub_index == -1:
+                            user_prefs["vclass"] = options[0]
+                            print(f"Selected: Any {group_name}")
+                        elif 0 <= sub_index < len(options):
+                            user_prefs["vclass"] = options[sub_index]
+                            print(f"Selected: {options[sub_index]}")
+                        else:
+                            user_prefs["vclass"] = options[0]
+                            print(f"Invalid choice. Selected: {options[0]}")
+                    except ValueError:
+                        user_prefs["vclass"] = options[0]
+                        print(f"Invalid choice. Selected: {options[0]}")
+                else:
+                    user_prefs["vclass"] = options[0]
+                    print(f"Selected: {options[0]}")
             else:
-                user_prefs["vclass"] = choice
+                custom_vclass = input("Enter custom vehicle class: ")
+                user_prefs["vclass"] = custom_vclass
+                print(f"Selected: {custom_vclass}")
         except ValueError:
             user_prefs["vclass"] = choice
-            
-        # Filter cars based on vehicle class
+            print(f"Selected: {choice}")
+
         filtered_cars = [car for car in self.car_data if car.get("vclass") == user_prefs["vclass"]]
-        
-        # Step 2: Choose fuel type
+
         fueltype_values = sorted(list(set(car.get("fueltype") for car in filtered_cars 
                                     if car.get("fueltype") is not None)))
-        print("\nAvailable fuel types for selected vehicle class:")
-        for i, fueltype in enumerate(fueltype_values, 1):
-            print(f"{i}. {fueltype}")
+
+        if not fueltype_values:
+            fueltype_values = sorted(list(set(car.get("fueltype") for car in self.car_data 
+                                      if car.get("fueltype") is not None)))
+        
+        grouped_fueltype = self.group_options(fueltype_values, "fueltype")
+        
+        print("\nAvailable fuel types:")
+        for i, (group_name, options) in enumerate(grouped_fueltype.items(), 1):
+            print(f"{i}. {group_name}")
             
-        choice = input("\nSelect fuel type (enter number or type custom value): ")
+        choice = input("\nSelect fuel type (enter number): ")
         try:
             index = int(choice) - 1
-            if 0 <= index < len(fueltype_values):
-                user_prefs["fueltype"] = fueltype_values[index]
+            if 0 <= index < len(grouped_fueltype):
+                group_name = list(grouped_fueltype.keys())[index]
+
+                options = grouped_fueltype[group_name]
+                if len(options) > 1:
+                    print(f"\nSpecific options for {group_name}:")
+                    for j, option in enumerate(options, 1):
+                        print(f"{j}. {option}")
+                    sub_choice = input("\nSelect specific option (enter number or 0 for any): ")
+                    try:
+                        sub_index = int(sub_choice) - 1
+                        if sub_index == -1:
+                            user_prefs["fueltype"] = options[0]
+                            print(f"Selected: Any {group_name}")
+                        elif 0 <= sub_index < len(options):
+                            user_prefs["fueltype"] = options[sub_index]
+                            print(f"Selected: {options[sub_index]}")
+                        else:
+                            user_prefs["fueltype"] = options[0]
+                            print(f"Invalid choice. Selected: {options[0]}")
+                    except ValueError:
+                        user_prefs["fueltype"] = options[0]
+                        print(f"Invalid choice. Selected: {options[0]}")
+                else:
+                    user_prefs["fueltype"] = options[0]
+                    print(f"Selected: {options[0]}")
             else:
-                user_prefs["fueltype"] = choice
+                custom_fueltype = input("Enter custom fuel type: ")
+                user_prefs["fueltype"] = custom_fueltype
+                print(f"Selected: {custom_fueltype}")
         except ValueError:
             user_prefs["fueltype"] = choice
-            
-        # Filter cars based on fuel type
+            print(f"Selected: {choice}")
+
         filtered_cars = [car for car in filtered_cars 
                         if car.get("fueltype") == user_prefs["fueltype"]]
-        
-        # Step 3: Choose drive type
+
         drive_values = sorted(list(set(car.get("drive") for car in filtered_cars 
                                  if car.get("drive") is not None)))
-        print("\nAvailable drive types for selected options:")
-        for i, drive in enumerate(drive_values, 1):
-            print(f"{i}. {drive}")
+
+        if not drive_values:
+            drive_values = sorted(list(set(car.get("drive") for car in self.car_data 
+                                   if car.get("drive") is not None)))
+        
+        grouped_drive = self.group_options(drive_values, "drive")
+        
+        print("\nAvailable drive types:")
+        for i, (group_name, options) in enumerate(grouped_drive.items(), 1):
+            print(f"{i}. {group_name}")
             
-        choice = input("\nSelect drive type (enter number or type custom value): ")
+        choice = input("\nSelect drive type (enter number): ")
         try:
             index = int(choice) - 1
-            if 0 <= index < len(drive_values):
-                user_prefs["drive"] = drive_values[index]
+            if 0 <= index < len(grouped_drive):
+                group_name = list(grouped_drive.keys())[index]
+            
+                options = grouped_drive[group_name]
+                if len(options) > 1:
+                    print(f"\nSpecific options for {group_name}:")
+                    for j, option in enumerate(options, 1):
+                        print(f"{j}. {option}")
+                    sub_choice = input("\nSelect specific option (enter number or 0 for any): ")
+                    try:
+                        sub_index = int(sub_choice) - 1
+                        if sub_index == -1:
+                            user_prefs["drive"] = options[0]
+                            print(f"Selected: Any {group_name}")
+                        elif 0 <= sub_index < len(options):
+                            user_prefs["drive"] = options[sub_index]
+                            print(f"Selected: {options[sub_index]}")
+                        else:
+                            user_prefs["drive"] = options[0]
+                            print(f"Invalid choice. Selected: {options[0]}")
+                    except ValueError:
+                        user_prefs["drive"] = options[0]
+                        print(f"Invalid choice. Selected: {options[0]}")
+                else:
+                    user_prefs["drive"] = options[0]
+                    print(f"Selected: {options[0]}")
             else:
-                user_prefs["drive"] = choice
+                custom_drive = input("Enter custom drive type: ")
+                user_prefs["drive"] = custom_drive
+                print(f"Selected: {custom_drive}")
         except ValueError:
             user_prefs["drive"] = choice
+            print(f"Selected: {choice}")
             
-        # Filter cars based on drive type
         filtered_cars = [car for car in filtered_cars 
                         if car.get("drive") == user_prefs["drive"]]
         
-        # Step 4: Choose transmission type
         trany_values = sorted(list(set(car.get("trany") for car in filtered_cars 
                                  if car.get("trany") is not None)))
-        print("\nAvailable transmission types for selected options:")
-        for i, trany in enumerate(trany_values, 1):
-            print(f"{i}. {trany}")
+        
+        if not trany_values:
+            trany_values = sorted(list(set(car.get("trany") for car in self.car_data 
+                                   if car.get("trany") is not None)))
+        
+        grouped_trany = self.group_options(trany_values, "trany")
+        
+        print("\nAvailable transmission types:")
+        for i, (group_name, options) in enumerate(grouped_trany.items(), 1):
+            print(f"{i}. {group_name}")
             
-        choice = input("\nSelect transmission type (enter number or type custom value): ")
+        choice = input("\nSelect transmission type (enter number): ")
         try:
             index = int(choice) - 1
-            if 0 <= index < len(trany_values):
-                user_prefs["trany"] = trany_values[index]
+            if 0 <= index < len(grouped_trany):
+                group_name = list(grouped_trany.keys())[index]
+                
+                options = grouped_trany[group_name]
+                if len(options) > 1:
+                    print(f"\nSpecific options for {group_name}:")
+                    for j, option in enumerate(options, 1):
+                        print(f"{j}. {option}")
+                    sub_choice = input("\nSelect specific option (enter number or 0 for any): ")
+                    try:
+                        sub_index = int(sub_choice) - 1
+                        if sub_index == -1:
+                            user_prefs["trany"] = options[0]
+                            print(f"Selected: Any {group_name}")
+                        elif 0 <= sub_index < len(options):
+                            user_prefs["trany"] = options[sub_index]
+                            print(f"Selected: {options[sub_index]}")
+                        else:
+                            user_prefs["trany"] = options[0]
+                            print(f"Invalid choice. Selected: {options[0]}")
+                    except ValueError:
+                        user_prefs["trany"] = options[0]
+                        print(f"Invalid choice. Selected: {options[0]}")
+                else:
+                    user_prefs["trany"] = options[0]
+                    print(f"Selected: {options[0]}")
             else:
-                user_prefs["trany"] = choice
+                custom_trany = input("Enter custom transmission type: ")
+                user_prefs["trany"] = custom_trany
+                print(f"Selected: {custom_trany}")
         except ValueError:
             user_prefs["trany"] = choice
+            print(f"Selected: {choice}")
             
-        # Filter cars based on transmission type
         filtered_cars = [car for car in filtered_cars 
                         if car.get("trany") == user_prefs["trany"]]
         
-        # Step 5: Choose cylinders
         cylinders_values = sorted(list(set(car.get("cylinders") for car in filtered_cars 
                                     if car.get("cylinders") is not None)), key=str)
-        print("\nAvailable cylinder counts for selected options:")
-        for i, cylinders in enumerate(cylinders_values, 1):
-            print(f"{i}. {cylinders}")
+        
+        if not cylinders_values:
+            cylinders_values = sorted(list(set(car.get("cylinders") for car in self.car_data 
+                                      if car.get("cylinders") is not None)), key=str)
+        
+        grouped_cylinders = self.group_options(cylinders_values, "cylinders")
+        
+        print("\nAvailable cylinder counts:")
+        for i, (group_name, options) in enumerate(grouped_cylinders.items(), 1):
+            print(f"{i}. {group_name}")
             
-        choice = input("\nSelect cylinders (enter number or type custom value): ")
+        choice = input("\nSelect cylinder count (enter number): ")
         try:
             index = int(choice) - 1
-            if 0 <= index < len(cylinders_values):
-                user_prefs["cylinders"] = cylinders_values[index]
+            if 0 <= index < len(grouped_cylinders):
+                group_name = list(grouped_cylinders.keys())[index]
+                
+                options = grouped_cylinders[group_name]
+                if len(options) > 1:
+                    print(f"\nSpecific options for {group_name}:")
+                    for j, option in enumerate(options, 1):
+                        print(f"{j}. {option}")
+                    sub_choice = input("\nSelect specific option (enter number or 0 for any): ")
+                    try:
+                        sub_index = int(sub_choice) - 1
+                        if sub_index == -1:
+                            user_prefs["cylinders"] = options[0]
+                            print(f"Selected: Any {group_name}")
+                        elif 0 <= sub_index < len(options):
+                            user_prefs["cylinders"] = options[sub_index]
+                            print(f"Selected: {options[sub_index]}")
+                        else:
+                            user_prefs["cylinders"] = options[0]
+                            print(f"Invalid choice. Selected: {options[0]}")
+                    except ValueError:
+                        user_prefs["cylinders"] = options[0]
+                        print(f"Invalid choice. Selected: {options[0]}")
+                else:
+                    user_prefs["cylinders"] = options[0]
+                    print(f"Selected: {options[0]}")
             else:
-                user_prefs["cylinders"] = choice
+                custom_cylinders = input("Enter custom cylinder count: ")
+                user_prefs["cylinders"] = custom_cylinders
+                print(f"Selected: {custom_cylinders}")
         except ValueError:
             user_prefs["cylinders"] = choice
+            print(f"Selected: {choice}")
             
         print("\n=== Your preferences ===")
         print(f"Vehicle class: {user_prefs['vclass']}")
@@ -151,42 +401,6 @@ class CarExpert:
         print(f"Cylinders: {user_prefs['cylinders']}")
         
         return user_prefs
-    
-    def backward_chain(self, goal, user_preferences):
-        self.recommendations = []
-        models_already_recommended = set()
-        
-        # Rule hierarchy: from most specific to most general
-        rule_hierarchy = [
-            self.rule_perfect_match,
-            self.rule_relax_cylinders,
-            self.rule_relax_transmission,
-            self.rule_relax_drive,
-            self.rule_relax_fuel_type,
-            self.rule_last_resort
-        ]
-        
-        # Try each rule in order
-        for rule in rule_hierarchy:
-            if len(self.recommendations) >= self.recommendation_limit:
-                break
-            potential_matches = rule(user_preferences)
-            
-            for match in potential_matches:
-                make = match["car_data"].get("make")
-                model = match["car_data"].get("model")
-                model_key = f"{make}_{model}"
-
-                if model_key not in models_already_recommended:
-                    self.recommendations.append(match)
-                    models_already_recommended.add(model_key)
-
-                    if len(self.recommendations) >= self.recommendation_limit:
-                        break
-            if len(self.recommendations) > 0 and goal == "find_any_recommendation":
-                break
-                
-        return self.recommendations
     
     def rule_perfect_match(self, user_prefs):
         """Rule for perfect match"""
@@ -210,6 +424,7 @@ class CarExpert:
         return matches
     
     def rule_relax_cylinders(self, user_prefs):
+        """Rule for relaxing cylinder constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -232,6 +447,7 @@ class CarExpert:
         return matches
     
     def rule_relax_transmission(self, user_prefs):
+        """Rule for relaxing transmission constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -253,6 +469,7 @@ class CarExpert:
         return matches
     
     def rule_relax_drive(self, user_prefs):
+        """Rule for relaxing drive type constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -273,6 +490,7 @@ class CarExpert:
         return matches
     
     def rule_relax_fuel_type(self, user_prefs):
+        """Rule for relaxing fuel type constraint"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
@@ -292,6 +510,7 @@ class CarExpert:
         return matches
     
     def rule_last_resort(self, user_prefs):
+        """Last resort rule - returns random cars"""
         matches = []
         for car_id, car in enumerate(self.car_data):
             if (car.get("vclass") is not None and
@@ -309,7 +528,51 @@ class CarExpert:
         
         return matches
     
+    def backward_chain(self, goal, user_preferences):
+        """
+        Implements backward chaining to find recommendations.
+        Goal is the rule we're trying to confirm.
+        """
+        self.recommendations = []
+        models_already_recommended = set() # Salvare modele deja recomandate
+        
+        rule_hierarchy = [
+            self.rule_perfect_match,
+            self.rule_relax_cylinders,
+            self.rule_relax_transmission,
+            self.rule_relax_drive,
+            self.rule_relax_fuel_type,
+            self.rule_last_resort
+        ]
+        
+        # Incearca fiecare regula pe rand
+        for rule in rule_hierarchy:
+            if len(self.recommendations) >= self.recommendation_limit:
+                break
+        
+            potential_matches = rule(user_preferences)
+            
+            for match in potential_matches:
+                make = match["car_data"].get("make")
+                model = match["car_data"].get("model")
+                model_key = f"{make}_{model}"
+                
+                # Verificare recomandare dubla
+                if model_key not in models_already_recommended:
+                    self.recommendations.append(match)
+                    models_already_recommended.add(model_key)
+                
+                    if len(self.recommendations) >= self.recommendation_limit:
+                        break
+            
+            # Oprire cand ajunge la 3 recomandari
+            if len(self.recommendations) > 0 and goal == "find_any_recommendation":
+                break
+                
+        return self.recommendations
+    
     def display_recommendations(self, recommendations, limit=3):
+        """Displays recommendations"""
         if not recommendations:
             print("\nNo recommendations found that match your preferences.")
             return
@@ -330,12 +593,11 @@ class CarExpert:
             print(f"Transmission: {car_data.get('trany', 'Unknown')}")
             print(f"Cylinders: {car_data.get('cylinders', 'Unknown')}")
             print("-" * 50)
-            
+
     def run(self):        
         user_preferences = self.get_user_preferences()
+    
         recommendations = self.backward_chain("find_best_recommendations", user_preferences)
-        
-        # Sort recommendations by match level
         priority_order = {
             "Perfect match": 1,
             "Good match (different cylinders)": 2,
@@ -349,7 +611,6 @@ class CarExpert:
                                       key=lambda x: priority_order.get(x["match_level"], 999))
         
         self.display_recommendations(sorted_recommendations)
-
 
 if __name__ == "__main__":
     expert_system = CarExpert()
