@@ -182,7 +182,7 @@ class CarExpert:
             user_prefs["vclass"] = choice
             print(f"Selected: {choice}")
 
-        filtered_cars = [car for car in self.car_data if car.get("vclass") == user_prefs["vclass"]]
+        filtered_cars = [car for car in self.car_data if car.get("vclass") in user_prefs["vclass"]]
 
         fueltype_values = sorted(list(set(car.get("fueltype") for car in filtered_cars 
                                     if car.get("fueltype") is not None)))
@@ -235,7 +235,7 @@ class CarExpert:
             print(f"Selected: {choice}")
 
         filtered_cars = [car for car in filtered_cars 
-                        if car.get("fueltype") == user_prefs["fueltype"]]
+                        if car.get("fueltype") in user_prefs["fueltype"]]
 
         drive_values = sorted(list(set(car.get("drive") for car in filtered_cars 
                                  if car.get("drive") is not None)))
@@ -288,7 +288,7 @@ class CarExpert:
             print(f"Selected: {choice}")
             
         filtered_cars = [car for car in filtered_cars 
-                        if car.get("drive") == user_prefs["drive"]]
+                        if car.get("drive") in user_prefs["drive"]]
         
         trany_values = sorted(list(set(car.get("trany") for car in filtered_cars 
                                  if car.get("trany") is not None)))
@@ -341,7 +341,7 @@ class CarExpert:
             print(f"Selected: {choice}")
             
         filtered_cars = [car for car in filtered_cars 
-                        if car.get("trany") == user_prefs["trany"]]
+                        if car.get("trany") in user_prefs["trany"]]
         
         cylinders_values = sorted(list(set(car.get("cylinders") for car in filtered_cars 
                                     if car.get("cylinders") is not None)), key=str)
@@ -405,11 +405,11 @@ class CarExpert:
     def rule_perfect_match(self, user_prefs):
         matches = []
         for car_id, car in enumerate(self.car_data):
-            if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
-                car.get("fueltype") == user_prefs["fueltype"] and user_prefs["fueltype"] and
-                car.get("drive") == user_prefs["drive"] and user_prefs["drive"] and
-                car.get("trany") == user_prefs["trany"] and user_prefs["trany"] and
-                car.get("cylinders") == user_prefs["cylinders"] and user_prefs["cylinders"]):
+            if (car.get("vclass") in user_prefs["vclass"] and user_prefs["vclass"] and
+                car.get("fueltype") in user_prefs["fueltype"] and user_prefs["fueltype"] and
+                car.get("drive") in user_prefs["drive"] and user_prefs["drive"] and
+                car.get("trany") in user_prefs["trany"] and user_prefs["trany"] and
+                car.get("cylinders") in user_prefs["cylinders"] and user_prefs["cylinders"]):
                 
                 matches.append({
                     "id": car_id,
@@ -425,10 +425,10 @@ class CarExpert:
     def rule_relax_cylinders(self, user_prefs):
         matches = []
         for car_id, car in enumerate(self.car_data):
-            if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
-                car.get("fueltype") == user_prefs["fueltype"] and user_prefs["fueltype"] and
-                car.get("drive") == user_prefs["drive"] and user_prefs["drive"] and
-                car.get("trany") == user_prefs["trany"] and user_prefs["trany"] and
+            if (car.get("vclass") in user_prefs["vclass"] and user_prefs["vclass"] and
+                car.get("fueltype") in user_prefs["fueltype"] and user_prefs["fueltype"] and
+                car.get("drive") in user_prefs["drive"] and user_prefs["drive"] and
+                car.get("trany") in user_prefs["trany"] and user_prefs["trany"] and
                 car.get("cylinders") is not None and
                 user_prefs["cylinders"] and
                 car.get("cylinders") != user_prefs["cylinders"]):
@@ -447,9 +447,9 @@ class CarExpert:
     def rule_relax_transmission(self, user_prefs):
         matches = []
         for car_id, car in enumerate(self.car_data):
-            if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
-                car.get("fueltype") == user_prefs["fueltype"] and user_prefs["fueltype"] and
-                car.get("drive") == user_prefs["drive"] and user_prefs["drive"] and
+            if (car.get("vclass") in user_prefs["vclass"] and user_prefs["vclass"] and
+                car.get("fueltype") in user_prefs["fueltype"] and user_prefs["fueltype"] and
+                car.get("drive") in user_prefs["drive"] and user_prefs["drive"] and
                 car.get("trany") is not None and
                 user_prefs["trany"] and
                 car.get("trany") != user_prefs["trany"]):
@@ -468,8 +468,8 @@ class CarExpert:
     def rule_relax_drive(self, user_prefs):
         matches = []
         for car_id, car in enumerate(self.car_data):
-            if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
-                car.get("fueltype") == user_prefs["fueltype"] and user_prefs["fueltype"] and
+            if (car.get("vclass") in user_prefs["vclass"] and user_prefs["vclass"] and
+                car.get("fueltype") in user_prefs["fueltype"] and user_prefs["fueltype"] and
                 car.get("drive") is not None and
                 user_prefs["drive"] and
                 car.get("drive") != user_prefs["drive"]):
@@ -488,7 +488,7 @@ class CarExpert:
     def rule_relax_fuel_type(self, user_prefs):
         matches = []
         for car_id, car in enumerate(self.car_data):
-            if (car.get("vclass") == user_prefs["vclass"] and user_prefs["vclass"] and
+            if (car.get("vclass") in user_prefs["vclass"] and user_prefs["vclass"] and
                 car.get("fueltype") is not None and
                 user_prefs["fueltype"] and
                 car.get("fueltype") != user_prefs["fueltype"]):
