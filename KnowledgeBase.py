@@ -1,9 +1,7 @@
 import json
-import firebase_admin
-from firebase_admin import credentials, db
 from google_images_search import GoogleImagesSearch
 
-gis = GoogleImagesSearch('AIzaSyBzEcden7xTDwvnohLOqHL--tFccljfKNc', '62abc5b0b032e4571')
+gis = GoogleImagesSearch('AIzaSyAcaYPoAbOiKWRLfFPmQl9WxprGjUaStDI', '62abc5b0b032e4571')
 
 _search_params = {
     'q': 'apple',
@@ -34,12 +32,6 @@ class KnowledgeBase:
         except json.JSONDecodeError:
             print('Invalid JSON format')
             exit(1)
-
-    #Am citit datele direct din JSON-ul cu datele masinilor. Nu le-am mai citit din tabelul Firebase pentru ca aveam o problema, deci metoda asta e deocamdata inutila
-    def _update_firebase(self,table_data,path):
-        ref = db.reference(path)
-        ref.set(table_data)
-        print("Data successfully uploaded to Realtime Database!")
 
     #aici adaugam masinile in dictionar, una cate una
     def _read_table_data(self):
